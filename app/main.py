@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from services.reddit_client import fetch_posts
 from services.sentiment_analysis import analyze_sentiment
-from services.redis_service import store_post, get_posts, store_score
+from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts
 import base64
 import json
 
@@ -12,13 +12,17 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
+NUMBER_OF_POSTS = 10
+CANDIDATES = ["Donald Trump", "Kamala Harris"]
+NUMBER_OF_POSTS_TO_DISPLAY = 5
+
 # This endpoint will display the sentiment scores for each candidate
 @app.get("/")
 async def read_root(request: Request):
-    candidates = ["Trump", "Harris"]
+    candidates = CANDIDATES
     scores = {}
     for candidate in candidates:
-        posts = get_posts(candidate)
+        posts = get_all_posts(candidate)
         if posts:
             average_score = sum(float(post['score']) for post in posts) / len(posts)
             scores[candidate] = round(average_score, 2)
@@ -29,15 +33,15 @@ async def read_root(request: Request):
 # This endpoint will display the posts for a specific candidate
 @app.get("/candidate/{candidate_name}")
 async def read_candidate(request: Request, candidate_name: str):
-    posts = get_posts(candidate_name)
+    posts = get_recent_posts(candidate_name, limit=NUMBER_OF_POSTS)
     return templates.TemplateResponse("candidate.html", {"request": request, "candidate": candidate_name, "posts": posts})
 
 # This endpoint will be called by the scheduler to fetch the latest posts
 @app.post("/fetch-posts")
 def fetch_posts_endpoint(background_tasks: BackgroundTasks):
-    candidates = ["Donald Trump", "Kamala Harris"]
+    candidates = CANDIDATES
     for candidate in candidates:
-        posts = fetch_posts(candidate, limit=2)
+        posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS_TO_DISPLAY)
         for post in posts:
             store_post(candidate, post.title, post.url, 0)
             background_tasks.add_task(analyze_sentiment, f"Candidate: {candidate}, Title: {post.title}, Text: {post.selftext}", candidate, post.title)
