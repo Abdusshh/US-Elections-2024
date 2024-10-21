@@ -16,3 +16,6 @@ def schedule_reddit_fetch():
         cron="0 * * * *",  # Every hour
     )
     print(f"Scheduled job ID: {response['schedule_id']}")
+
+if __name__ == "__main__":
+    schedule_reddit_fetch()
