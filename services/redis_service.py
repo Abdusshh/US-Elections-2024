@@ -9,15 +9,15 @@ def store_post(candidate: str, title: str, url: str, score: float):
     key = f"{candidate}:{title}"
     data = {"title": title, "url": url, "score": score}
     redis_client.hset(key, values=data)
-    # store all post keys in a list without duplicates
-    redis_client.lpush(f"{candidate}:posts", key)
+    # store all post keys in a set 
+    redis_client.sadd(f"{candidate}:posts", key)
 
 def store_score(candidate: str, title: str, score: float):
     key = f"{candidate}:{title}"
     redis_client.hset(key, "score", score)
 
 def get_all_posts(candidate: str):
-    keys = redis_client.lrange(f"{candidate}:posts", 0, -1)
+    keys = redis_client.smembers(f"{candidate}:posts")
     posts = []
     for key in keys:
         post = redis_client.hgetall(key)
@@ -25,7 +25,8 @@ def get_all_posts(candidate: str):
     return posts
 
 def get_recent_posts(candidate: str, limit: int):
-    keys = redis_client.lrange(f"{candidate}:posts", 0, limit - 1)
+    keys = redis_client.smembers(f"{candidate}:posts")
+    keys = keys[-limit:]  # Get the most recent posts
     posts = []
     for key in keys:
         post = redis_client.hgetall(key)
