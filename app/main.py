@@ -42,12 +42,6 @@ def read_root(request: Request, candidate_name: str = None):
         "posts": posts
     })
 
-# This endpoint will display the posts for a specific candidate
-@app.get("/candidate/{candidate_name}")
-def read_candidate(request: Request, candidate_name: str):
-    posts = get_recent_posts(candidate_name, limit=NUMBER_OF_POSTS_TO_DISPLAY)
-    return templates.TemplateResponse("candidate.html", {"request": request, "candidate": candidate_name, "posts": posts})
-
 # This endpoint will be called by the scheduler to fetch the latest posts
 @app.post("/fetch-posts")
 def fetch_posts_endpoint():

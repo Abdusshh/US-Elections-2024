@@ -11,7 +11,7 @@ api_base_url = os.getenv("API_BASE_URL")
 
 qstash_client = QStash(qstash_token)
 
-async def analyze_sentiment(text: str, candidate: str, title: str):
+def analyze_sentiment(text: str, candidate: str, title: str):
     response = qstash_client.message.publish_json(
         api={"name": "llm", "provider": openai(openai_api_key)},
         body={
