@@ -68,10 +68,12 @@ def fetch_posts_endpoint():
 @app.post("/store-post")
 async def store_post_endpoint(request: Request):
     data = await request.json()
-    print(data)
 
-    # Safely extract the 'body' field
-    body = data.get('body', '')
+    # # Safely extract the 'body' field
+    # body = data.get('body', '')
+    # print(body)
+
+    body = json.loads(data)
 
     # Extract the candidate and posts from the decoded body
     candidate = body["candidate"]
