@@ -39,8 +39,7 @@ def fetch_posts_endpoint(background_tasks: BackgroundTasks):
     for candidate in candidates:
         posts = fetch_posts(candidate)
         for post in posts:
-
-            background_tasks.add_task(analyze_sentiment, post.body)
+            background_tasks.add_task(analyze_sentiment, f"{candidate}", post.title, post.selftext)
     return {"status": "Fetching started"}
 
 # This endpoint will be used as the callback URL for the sentiment analysis
