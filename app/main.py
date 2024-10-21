@@ -68,7 +68,8 @@ def fetch_posts_endpoint():
 @app.post("/store-post")
 def store_post_endpoint(request: Request):
     data = request.json()
-    candidate = data["candidate"]
+    body = data.get('body', '')
+    candidate = body["candidate"]
     posts = data["posts"]
     for post in posts:
         store_post(candidate, post["title"], post["url"], 50) # Default score of 50
