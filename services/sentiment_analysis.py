@@ -12,7 +12,7 @@ api_base_url = os.getenv("API_BASE_URL")
 qstash_client = QStash(qstash_token)
 
 def analyze_sentiment(text: str, candidate: str, title: str):
-    response = qstash_client.message.publish_json(
+    qstash_client.message.publish_json(
         api={"name": "llm", "provider": openai(openai_api_key)},
         body={
             "model": "gpt-3.5-turbo",
@@ -33,5 +33,3 @@ def analyze_sentiment(text: str, candidate: str, title: str):
         headers={"Upstash-Callback-Retries": 1},
         retries=1,
     )
-    # response is message_id
-    return response
