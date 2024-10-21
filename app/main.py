@@ -73,11 +73,11 @@ async def store_post_endpoint(request: Request):
     # body = data.get('body', '')
     # print(body)
 
-    body = json.loads(data)
+    # body = json.loads(data)
 
     # Extract the candidate and posts from the decoded body
-    candidate = body["candidate"]
-    posts = body["posts"]
+    candidate = data["candidate"]
+    posts = data["posts"]
 
     # Iterate over the posts and store each one, while analyzing its sentiment
     for post in posts:
