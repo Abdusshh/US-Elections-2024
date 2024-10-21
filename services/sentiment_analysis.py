@@ -1,4 +1,3 @@
-# sentiment_analysis.py
 import os
 from qstash import QStash
 from qstash.chat import openai
@@ -12,7 +11,7 @@ api_base_url = os.getenv("API_BASE_URL")
 
 qstash_client = QStash(qstash_token)
 
-async def analyze_sentiment(text: str, candidate: str, title: str):
+def analyze_sentiment(text: str, candidate: str, title: str):
     response = qstash_client.message.publish_json(
         api={"name": "llm", "provider": openai(openai_api_key)},
         body={
@@ -28,10 +27,3 @@ async def analyze_sentiment(text: str, candidate: str, title: str):
     )
     # response is message_id
     return response
-
-# def parse_response(response):
-#     # Implement the logic to parse the response and extract the score
-#     # For example, assume the assistant returns: "The sentiment score is 75."
-#     content = response.get('choices')[0]['message']['content']
-#     score = float(''.join(filter(str.isdigit, content)))
-    return score

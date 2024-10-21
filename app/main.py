@@ -1,4 +1,3 @@
-# main.py
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -18,7 +17,7 @@ NUMBER_OF_POSTS_TO_DISPLAY = 5
 
 # This endpoint will display the sentiment scores for each candidate
 @app.get("/")
-async def read_root(request: Request):
+def read_root(request: Request):
     candidates = CANDIDATES
     scores = {}
     for candidate in candidates:
@@ -32,7 +31,7 @@ async def read_root(request: Request):
 
 # This endpoint will display the posts for a specific candidate
 @app.get("/candidate/{candidate_name}")
-async def read_candidate(request: Request, candidate_name: str):
+def read_candidate(request: Request, candidate_name: str):
     posts = get_recent_posts(candidate_name, limit=NUMBER_OF_POSTS_TO_DISPLAY)
     return templates.TemplateResponse("candidate.html", {"request": request, "candidate": candidate_name, "posts": posts})
 
@@ -50,7 +49,7 @@ def fetch_posts_endpoint():
 # This endpoint will be used as the callback URL for the sentiment analysis
 # It will parse the response and store the sentiment score to redis
 @app.post("/sentiment-callback")
-async def sentiment_callback(candidate: str, title: str, request: Request):
+def sentiment_callback(candidate: str, title: str, request: Request):
 
     # Parse the request body to JSON format
     data = await request.json()
