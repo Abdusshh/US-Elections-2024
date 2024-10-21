@@ -69,7 +69,7 @@ def fetch_posts_endpoint():
 def store_post_endpoint(request: Request):
     data = request.json()
     print(data)
-    body = data.get('body', '')
+    body = data["body"]
     decoded_body = json.loads(body)
     candidate = decoded_body["candidate"]
     posts = decoded_body["posts"]
