@@ -21,7 +21,7 @@ def fetch_posts(candidate: str, limit: int = 10):
     posts = []
     query = candidate
     subreddit = reddit.subreddit("all")
-    for submission in subreddit.search(query, limit=limit, sort="new"):
+    for submission in subreddit.search(query, sort="new"):
         if submission.selftext == "": # Skip posts without text
             continue
         posts.append({
@@ -29,4 +29,6 @@ def fetch_posts(candidate: str, limit: int = 10):
             "selftext": submission.selftext,
             "url": submission.url
         })
+        if len(posts) >= limit:
+            break
     return posts
