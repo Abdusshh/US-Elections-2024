@@ -9,7 +9,8 @@ def store_post(candidate: str, title: str, url: str, score: float):
     key = f"{candidate}:{title}"
     data = {"title": title, "url": url, "score": score}
     redis_client.hset(key, values=data)
-    # If I want to keep a list of posts add here
+    # store all post keys in a list without duplicates
+    redis_client.lpush(f"{candidate}:posts", key)
 
 def store_score(candidate: str, title: str, score: float):
     key = f"{candidate}:{title}"
