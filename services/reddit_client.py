@@ -20,8 +20,8 @@ reddit = praw.Reddit(
 def fetch_posts(candidate: str, limit: int = 10):
     posts = []
     query = candidate
-    subreddit = reddit.subreddit("all")
-    for submission in subreddit.search(query, limit=limit).new():
+    subreddit = reddit.subreddit("all").new()
+    for submission in subreddit.search(query, limit=limit):
         if submission.selftext == "": # Skip posts without text
             continue
         posts.append({
