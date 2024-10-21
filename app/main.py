@@ -49,10 +49,10 @@ def fetch_posts_endpoint():
 # This endpoint will be used as the callback URL for the sentiment analysis
 # It will parse the response and store the sentiment score to redis
 @app.post("/sentiment-callback")
-def sentiment_callback(candidate: str, title: str, request: Request):
+async def sentiment_callback(candidate: str, title: str, request: Request):
 
     # Parse the request body to JSON format
-    data = request.json()
+    data = await request.json()
     print(data)
 
     # Decode the base64-encoded 'body' field from the callback
