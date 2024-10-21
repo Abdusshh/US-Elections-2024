@@ -18,7 +18,15 @@ reddit = praw.Reddit(
 
 # Function to fetch posts from Reddit
 def fetch_posts(candidate: str, limit: int = 10):
+    posts = []
     query = candidate
     subreddit = reddit.subreddit("all")
-    posts = subreddit.search(query, limit=limit, sort='new')
+    for submission in subreddit.search(query, limit=limit).new():
+        if submission.selftext == "": # Skip posts without text
+            continue
+        posts.append({
+            "title": submission.title,
+            "selftext": submission.selftext,
+            "url": submission.url
+        })
     return posts

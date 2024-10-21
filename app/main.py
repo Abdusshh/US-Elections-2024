@@ -11,7 +11,7 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-NUMBER_OF_POSTS = 2
+NUMBER_OF_POSTS = 1
 CANDIDATES = ["Donald Trump", "Kamala Harris"]
 NUMBER_OF_POSTS_TO_DISPLAY = 5
 
