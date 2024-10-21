@@ -11,9 +11,9 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-NUMBER_OF_POSTS = 1
+NUMBER_OF_POSTS = 2
 CANDIDATES = ["Donald Trump", "Kamala Harris"]
-NUMBER_OF_POSTS_TO_DISPLAY = 5
+NUMBER_OF_POSTS_TO_DISPLAY = 10
 
 # This endpoint will display the sentiment scores for each candidate
 @app.get("/")

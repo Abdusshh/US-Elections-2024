@@ -1,5 +1,6 @@
 import os
 import praw
+import json
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -29,6 +30,7 @@ def fetch_posts(candidate: str, limit: int = 10):
             "selftext": submission.selftext,
             "url": submission.url
         })
-        if len(posts) >= limit:
+        if len(posts) >= limit: # Limit the number of posts
             break
-    return posts
+        # we need to return the posts as json
+    return json.dumps(posts)
