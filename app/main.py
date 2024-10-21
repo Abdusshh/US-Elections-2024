@@ -54,6 +54,8 @@ def fetch_posts_endpoint():
     candidates = CANDIDATES
     for candidate in candidates:
         posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS)
+
+        # Publish the posts to the /store-post endpoint
         qstash_client.message.publish_json(
             url=f"{os.getenv('API_BASE_URL')}/store-post",
             body={
@@ -76,10 +78,30 @@ async def store_post_endpoint(request: Request):
     for post in posts:
         print(f"Storing post: {post['title']}")
         store_post(candidate, post["title"], post["url"], 50)  # Default score of 50
-        analyze_sentiment(f"Candidate: {candidate}, Title: {post['title']}, Text: {post['selftext']}", candidate, post["title"])
 
-    # Return a JSON response indicating success
-    return JSONResponse(content={"status": "Post stored"})
+        # Analyze the sentiment of the post
+        qstash_client.message.publish_json(
+            url=f"{os.getenv('API_BASE_URL')}/analyze-sentiment",
+            body={
+                "candidate": candidate,
+                "title": post["title"],
+                "selftext": post["selftext"]
+            },
+            headers={"Content-Type": "application/json"},
+            retries=1,
+        )
+
+# This endpoint will be used to analyze the sentiment of a post
+@app.post("/analyze-sentiment")
+async def analyze_sentiment_endpoint(request: Request):
+    data = await request.json()
+    selftext = data["selftext"]
+    candidate = data["candidate"]
+    title = data["title"]
+
+    response = analyze_sentiment(f"Candidate: {candidate}, Title: {title}, Text: {selftext}", candidate, title)
+
+    return JSONResponse(content={"status": "Sentiment analysis started", "message_id": response})
 
 # This endpoint will be used as the callback URL for the sentiment analysis
 # It will parse the response and store the sentiment score to redis
