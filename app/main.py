@@ -17,17 +17,30 @@ NUMBER_OF_POSTS_TO_DISPLAY = 5
 
 # This endpoint will display the sentiment scores for each candidate
 @app.get("/")
-def read_root(request: Request):
+def read_root(request: Request, candidate_name: str = None):
     candidates = CANDIDATES
     scores = {}
+    posts = []
+
+    # Calculate sentiment scores for all candidates
     for candidate in candidates:
-        posts = get_all_posts(candidate)
-        if posts:
-            average_score = sum(float(post['score']) for post in posts) / len(posts)
+        candidate_posts = get_all_posts(candidate)
+        if candidate_posts:
+            average_score = sum(float(post['score']) for post in candidate_posts) / len(candidate_posts)
             scores[candidate] = round(average_score, 2)
         else:
             scores[candidate] = "No data"
-    return templates.TemplateResponse("index.html", {"request": request, "scores": scores})
+
+    # If a candidate is selected, fetch their recent posts
+    if candidate_name:
+        posts = get_recent_posts(candidate_name, limit=NUMBER_OF_POSTS_TO_DISPLAY)
+
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "scores": scores,
+        "selected_candidate": candidate_name,
+        "posts": posts
+    })
 
 # This endpoint will display the posts for a specific candidate
 @app.get("/candidate/{candidate_name}")
