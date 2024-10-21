@@ -24,6 +24,7 @@ def analyze_sentiment(text: str, candidate: str, title: str):
                     Kamala Harris and Donald Trump are both running for president in 2024. Harris is a Democrat, while Trump is a Republican.
                     Rate the sentiment based on the candidate mentioned in the text.
                     If the sentiment is positive, rate it closer to 100. If it's negative, rate it closer to 0.
+                    Just type a number between 0 and 100.
                     """,
                 }
             ],

@@ -69,18 +69,12 @@ def fetch_posts_endpoint():
 async def store_post_endpoint(request: Request):
     data = await request.json()
 
-    # # Safely extract the 'body' field
-    # body = data.get('body', '')
-    # print(body)
-
-    # body = json.loads(data)
-
-    # Extract the candidate and posts from the decoded body
     candidate = data["candidate"]
     posts = data["posts"]
 
     # Iterate over the posts and store each one, while analyzing its sentiment
     for post in posts:
+        print(f"Storing post: {post['title']}")
         store_post(candidate, post["title"], post["url"], 50)  # Default score of 50
         analyze_sentiment(f"Candidate: {candidate}, Title: {post['title']}, Text: {post['selftext']}", candidate, post["title"])
 
