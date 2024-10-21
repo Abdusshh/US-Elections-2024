@@ -71,7 +71,7 @@ async def store_post_endpoint(request: Request):
     print(data)
 
     # Safely extract the 'body' field
-    body = data["body"]
+    body = data.get('body', '')
 
     # Parse the body into a Python dictionary
     decoded_body = json.loads(body)
