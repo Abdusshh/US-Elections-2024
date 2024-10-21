@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from services.reddit_client import fetch_posts
 from services.sentiment_analysis import analyze_sentiment
-from services.redis_service import store_post, get_posts
+from services.redis_service import store_post, get_posts, store_score
 import base64
 import json
 
@@ -39,7 +39,8 @@ def fetch_posts_endpoint(background_tasks: BackgroundTasks):
     for candidate in candidates:
         posts = fetch_posts(candidate, limit=2)
         for post in posts:
-            background_tasks.add_task(analyze_sentiment, f"Candidate: {candidate}, Title: {post.title}, Text: {post.selftext}", candidate, post.title, post.url)
+            store_post(candidate, post.title, post.url, 0)
+            background_tasks.add_task(analyze_sentiment, f"Candidate: {candidate}, Title: {post.title}, Text: {post.selftext}", candidate, post.title)
     return {"status": "Fetching started"}
 
 # This endpoint will be used as the callback URL for the sentiment analysis
@@ -65,7 +66,7 @@ async def sentiment_callback(candidate: str, title: str, url: str, request: Requ
     score = parse_response(response)
 
     # Store the sentiment score to redis
-    store_post(candidate, title, url, score)
+    store_score(candidate, title, score)
 
     return JSONResponse(content={"status": "Sentiment score stored"})
 
