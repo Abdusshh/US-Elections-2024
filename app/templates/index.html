@@ -1,0 +1,12 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+{% block content %}
+<h1>Candidate Sentiment Scores</h1>
+<ul>
+    {% for candidate, score in scores.items() %}
+    <li>
+        <a href="/candidate/{{ candidate }}">{{ candidate }}: {{ score }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
