@@ -66,16 +66,26 @@ def fetch_posts_endpoint():
 
 # This endpoint will be used to store posts that come from /fetch-posts
 @app.post("/store-post")
-def store_post_endpoint(request: Request):
-    data = request.json()
+async def store_post_endpoint(request: Request):
+    data = await request.json()
     print(data)
+
+    # Safely extract the 'body' field
     body = data["body"]
+
+    # Parse the body into a Python dictionary
     decoded_body = json.loads(body)
+
+    # Extract the candidate and posts from the decoded body
     candidate = decoded_body["candidate"]
     posts = decoded_body["posts"]
+
+    # Iterate over the posts and store each one, while analyzing its sentiment
     for post in posts:
-        store_post(candidate, post["title"], post["url"], 50) # Default score of 50
-        analyze_sentiment(f"Candidate: {candidate}, Title: {post["title"]}, Text: {post["selftext"]}", candidate, post["title"])
+        store_post(candidate, post["title"], post["url"], 50)  # Default score of 50
+        analyze_sentiment(f"Candidate: {candidate}, Title: {post['title']}, Text: {post['selftext']}", candidate, post["title"])
+
+    # Return a JSON response indicating success
     return JSONResponse(content={"status": "Post stored"})
 
 # This endpoint will be used as the callback URL for the sentiment analysis
