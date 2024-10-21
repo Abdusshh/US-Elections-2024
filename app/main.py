@@ -34,7 +34,7 @@ async def read_candidate(request: Request, candidate_name: str):
 
 # This endpoint will be called by the scheduler to fetch the latest posts
 @app.post("/fetch-posts")
-async def fetch_posts_endpoint(background_tasks: BackgroundTasks):
+def fetch_posts_endpoint(background_tasks: BackgroundTasks):
     candidates = ["Trump", "Harris"]
     for candidate in candidates:
         posts = fetch_posts(candidate)
