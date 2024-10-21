@@ -30,6 +30,6 @@ def analyze_sentiment(text: str, candidate: str, title: str):
             ],
         },
         callback=f"{api_base_url}/sentiment-callback?candidate={candidate}&title={title}",
-        headers={"Upstash-Callback-Retries": 1},
+        headers={"Upstash-Callback-Retries": "1"},
         retries=1,
     )
