@@ -5,14 +5,19 @@ from fastapi.responses import FileResponse
 from services.reddit_client import fetch_posts
 from services.sentiment_analysis import analyze_sentiment
 from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts
+from qstash import QStash
 import base64
+import os
 import json
 
 app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-NUMBER_OF_POSTS = 2
+# Initialize QStash client
+qstash_client = QStash(os.getenv("QSTASH_TOKEN"))
+
+NUMBER_OF_POSTS = 1
 CANDIDATES = ["Donald Trump", "Kamala Harris"]
 NUMBER_OF_POSTS_TO_DISPLAY = 10
 
@@ -49,10 +54,26 @@ def fetch_posts_endpoint():
     candidates = CANDIDATES
     for candidate in candidates:
         posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS)
-        for post in posts:
-            store_post(candidate, post["title"], post["url"], 50) # Default score of 50
-            analyze_sentiment(f"Candidate: {candidate}, Title: {post["title"]}, Text: {post["selftext"]}", candidate, post["title"])
-    return {"status": "Fetching started"}
+        qstash_client.message.publish_json(
+            url=f"{os.getenv('API_BASE_URL')}/store-post",
+            body={
+                "posts": posts,
+                "candidate": candidate
+            },
+            headers={"Content-Type": "application/json"},
+            retries=1,
+        )
+
+# This endpoint will be used to store posts that come from /fetch-posts
+@app.post("/store-post")
+def store_post_endpoint(request: Request):
+    data = request.json()
+    candidate = data["candidate"]
+    posts = data["posts"]
+    for post in posts:
+        store_post(candidate, post["title"], post["url"], 50) # Default score of 50
+        analyze_sentiment(f"Candidate: {candidate}, Title: {post["title"]}, Text: {post["selftext"]}", candidate, post["title"])
+    return JSONResponse(content={"status": "Post stored"})
 
 # This endpoint will be used as the callback URL for the sentiment analysis
 # It will parse the response and store the sentiment score to redis
