@@ -1,5 +1,5 @@
 # main.py
-from fastapi import FastAPI, BackgroundTasks, Request
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from services.reddit_client import fetch_posts
@@ -12,7 +12,7 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-NUMBER_OF_POSTS = 10
+NUMBER_OF_POSTS = 2
 CANDIDATES = ["Donald Trump", "Kamala Harris"]
 NUMBER_OF_POSTS_TO_DISPLAY = 5
 
@@ -33,18 +33,18 @@ async def read_root(request: Request):
 # This endpoint will display the posts for a specific candidate
 @app.get("/candidate/{candidate_name}")
 async def read_candidate(request: Request, candidate_name: str):
-    posts = get_recent_posts(candidate_name, limit=NUMBER_OF_POSTS)
+    posts = get_recent_posts(candidate_name, limit=NUMBER_OF_POSTS_TO_DISPLAY)
     return templates.TemplateResponse("candidate.html", {"request": request, "candidate": candidate_name, "posts": posts})
 
 # This endpoint will be called by the scheduler to fetch the latest posts
 @app.post("/fetch-posts")
-def fetch_posts_endpoint(background_tasks: BackgroundTasks):
+def fetch_posts_endpoint():
     candidates = CANDIDATES
     for candidate in candidates:
-        posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS_TO_DISPLAY)
+        posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS)
         for post in posts:
-            store_post(candidate, post.title, post.url, 0)
-            background_tasks.add_task(analyze_sentiment, f"Candidate: {candidate}, Title: {post.title}, Text: {post.selftext}", candidate, post.title)
+            store_post(candidate, post.title, post.url, 50) # Default score of 50
+            analyze_sentiment(f"Candidate: {candidate}, Title: {post.title}, Text: {post.selftext}", candidate, post.title)
     return {"status": "Fetching started"}
 
 # This endpoint will be used as the callback URL for the sentiment analysis
