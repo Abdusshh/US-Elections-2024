@@ -26,7 +26,7 @@ def get_all_posts(candidate: str):
 
 def get_recent_posts(candidate: str, limit: int):
     keys = redis_client.smembers(f"{candidate}:posts")
-    keys = keys[-limit:]  # Get the most recent posts
+    keys = keys[-limit:]  # Get the most recent posts #TODO Check if this is correct
     posts = []
     for key in keys:
         post = redis_client.hgetall(key)
