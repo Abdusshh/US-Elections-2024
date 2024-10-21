@@ -68,9 +68,11 @@ def fetch_posts_endpoint():
 @app.post("/store-post")
 def store_post_endpoint(request: Request):
     data = request.json()
+    print(data)
     body = data.get('body', '')
-    candidate = body["candidate"]
-    posts = data["posts"]
+    decoded_body = json.loads(body)
+    candidate = decoded_body["candidate"]
+    posts = decoded_body["posts"]
     for post in posts:
         store_post(candidate, post["title"], post["url"], 50) # Default score of 50
         analyze_sentiment(f"Candidate: {candidate}, Title: {post["title"]}, Text: {post["selftext"]}", candidate, post["title"])
