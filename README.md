@@ -26,5 +26,5 @@ This project is a FastAPI application designed to provide information and analyt
 
 1. **Run the application:**
     ```bash
-    uvicorn main:app --reload
+    uvicorn app.main:app --reload
     ```
