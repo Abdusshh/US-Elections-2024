@@ -52,7 +52,7 @@ def fetch_posts_endpoint():
 def sentiment_callback(candidate: str, title: str, request: Request):
 
     # Parse the request body to JSON format
-    data = await request.json()
+    data = request.json()
     print(data)
 
     # Decode the base64-encoded 'body' field from the callback
