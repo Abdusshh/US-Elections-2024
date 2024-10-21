@@ -19,12 +19,17 @@ def analyze_sentiment(text: str, candidate: str, title: str):
             "messages": [
                 {
                     "role": "user",
-                    "content": f"Rate the sentiment of the following text between 0 (hate) and 100 (love) for the president candidate mentioned: '{text}'",
+                    "content": f"""
+                    Rate the sentiment of the following text between 0 (hate) and 100 (love): '{text}'
+                    Kamala Harris and Donald Trump are both running for president in 2024. Harris is a Democrat, while Trump is a Republican.
+                    Rate the sentiment based on the candidate mentioned in the text.
+                    If the sentiment is positive, rate it closer to 100. If it's negative, rate it closer to 0.
+                    """,
                 }
             ],
         },
         callback=f"{api_base_url}/sentiment-callback?candidate={candidate}&title={title}",
-        headers={"Upstash-Callback-Retries": "1"},
+        headers={"Upstash-Callback-Retries": 1},
         retries=1,
     )
     # response is message_id
