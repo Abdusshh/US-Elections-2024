@@ -32,5 +32,4 @@ def fetch_posts(candidate: str, limit: int = 10):
         })
         if len(posts) >= limit: # Limit the number of posts
             break
-        # we need to return the posts as json
-    return json.dumps(posts)
+    return posts

@@ -49,10 +49,9 @@ def fetch_posts_endpoint():
     candidates = CANDIDATES
     for candidate in candidates:
         posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS)
-        posts = json.loads(posts)
         for post in posts:
-            store_post(candidate, post.title, post.url, 50) # Default score of 50
-            analyze_sentiment(f"Candidate: {candidate}, Title: {post.title}, Text: {post.selftext}", candidate, post.title)
+            store_post(candidate, post["title"], post["url"], 50) # Default score of 50
+            analyze_sentiment(f"Candidate: {candidate}, Title: {post["title"]}, Text: {post["selftext"]}", candidate, post["title"])
     return {"status": "Fetching started"}
 
 # This endpoint will be used as the callback URL for the sentiment analysis
