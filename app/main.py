@@ -35,11 +35,11 @@ async def read_candidate(request: Request, candidate_name: str):
 # This endpoint will be called by the scheduler to fetch the latest posts
 @app.post("/fetch-posts")
 def fetch_posts_endpoint(background_tasks: BackgroundTasks):
-    candidates = ["Trump", "Harris"]
+    candidates = ["Donald Trump", "Kamala Harris"]
     for candidate in candidates:
-        posts = fetch_posts(candidate)
+        posts = fetch_posts(candidate, limit=2)
         for post in posts:
-            background_tasks.add_task(analyze_sentiment, f"Candidate: {candidate}, Title: {post.title}, Text: {post.selftext}")
+            background_tasks.add_task(analyze_sentiment, f"Candidate: {candidate}, Title: {post.title}, Text: {post.selftext}", candidate, post.title, post.url)
     return {"status": "Fetching started"}
 
 # This endpoint will be used as the callback URL for the sentiment analysis
