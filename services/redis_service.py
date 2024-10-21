@@ -8,7 +8,7 @@ redis_client = Redis.from_env()
 def store_post(candidate: str, title: str, url: str, score: float):
     key = f"{candidate}:{title}"
     data = {"title": title, "url": url, "score": score}
-    redis_client.hset(key, mapping=data)
+    redis_client.hset(key, values=data)
     redis_client.lpush(f"{candidate}:posts", key)
     # Keep only the latest 1000 posts
     redis_client.ltrim(f"{candidate}:posts", 0, 999)
