@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
 from services.reddit_client import fetch_posts
 from services.sentiment_analysis import analyze_sentiment
-from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts, check_post_exists
+from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts, check_post_exists, get_score
 from services.qstash_service import publish_message_to_qstash
 import base64
 import json
@@ -90,10 +90,11 @@ async def store_post_endpoint(request: Request):
 
     # Iterate over the posts and store each one, while analyzing its sentiment
     for post in posts:
-        # Skip posts that already exist in the store
+        # Skip posts that already exist in the store with a valid score
         if check_post_exists(candidate, post["title"]):
-            print(f"Post already exists, skipping: {post['title']}")
-            continue
+            if get_score(candidate, post["title"]) != str(DEFAULT_SCORE):
+                print(f"Post already exists with valid score, skipping: {post['title']}")
+                continue
 
         print(f"Storing new post: {post['title']}")
         store_post(candidate, post["title"], post["url"], DEFAULT_SCORE)

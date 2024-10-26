@@ -41,3 +41,7 @@ def get_recent_posts(candidate: str, limit: int):
 def check_post_exists(candidate: str, title: str):
     key = f"{candidate}:{title}"
     return redis_client.exists(key)
+
+def get_score(candidate: str, title: str):
+    key = f"{candidate}:{title}"
+    return redis_client.hget(key, "score")
