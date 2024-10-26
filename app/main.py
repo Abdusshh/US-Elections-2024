@@ -40,9 +40,8 @@ def read_root(request: Request, candidate_name: str = None):
             if number_of_valid_scores > 0:
                 average_score = total_score / number_of_valid_scores
                 scores[candidate] = round(average_score, 2)
-            scores[candidate] = round(average_score, 2)
-        else:
-            scores[candidate] = "No data"
+            else:
+                scores[candidate] = "No data"
 
     # If a candidate is selected, fetch their recent posts
     if candidate_name:
