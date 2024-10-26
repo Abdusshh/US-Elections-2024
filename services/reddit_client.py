@@ -29,9 +29,10 @@ def fetch_posts(candidate: str, limit: int = 10, sort: str = "hot", time_filter:
         if submission.score < 10:  # Skip posts with low scores
             continue
         
-        # Clean title and selftext to remove non-ASCII characters
-        title = submission.title.encode("ascii", "ignore").decode("ascii")
-        selftext = submission.selftext.encode("ascii", "ignore").decode("ascii")
+        # Clean title and selftext to only contain chars that are safe for JSON
+        safe_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?")
+        title = "".join(c for c in submission.title if c in safe_chars)
+        selftext = "".join(c for c in submission.selftext if c in safe_chars)
         
         posts.append({
             "title": title,

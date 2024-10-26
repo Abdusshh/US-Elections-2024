@@ -2,6 +2,7 @@ import os
 from qstash import QStash
 from qstash.chat import openai
 from dotenv import load_dotenv
+from urllib.parse import quote
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ def analyze_sentiment(text: str, candidate: str, title: str):
                     "content": f"""
 Please assess the sentiment of the following text on a scale from 0 to 100, where 0 represents strong negativity (hate) and 100 represents strong positivity (love):
 
-‘{text}’
+{text}
 
 The text mentions {candidate}, a 2024 presidential candidate. Rate the sentiment based on the tone toward {candidate}.
 
@@ -31,7 +32,6 @@ Provide a single number between 0 and 100 to reflect the overall sentiment in th
                 }
             ],
         },
-        callback=f"{api_base_url}/sentiment-callback?candidate={candidate}&title={title}",
-        headers={"Upstash-Callback-Retries": "1"},
+        callback = f"{api_base_url}/sentiment-callback?candidate={quote(candidate)}&title={quote(title)}"
         retries=1,
     )
