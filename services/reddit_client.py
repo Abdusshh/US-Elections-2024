@@ -30,7 +30,7 @@ def fetch_posts(candidate: str, limit: int = 10, sort: str = "hot", time_filter:
             continue
         
         # Clean title and selftext to only contain chars that are safe for JSON
-        safe_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?")
+        safe_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>? ")
         title = "".join(c for c in submission.title if c in safe_chars)
         selftext = "".join(c for c in submission.selftext if c in safe_chars)
         

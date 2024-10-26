@@ -144,6 +144,10 @@ async def sentiment_callback(candidate: str, title: str, request: Request):
 def parse_response(response):
     score = float(''.join(filter(str.isdigit, response)))
     print("Parsed score from response:", score)
+    if score > 100:
+        score = 100
+    if score < 0:
+        score = 0
     return score
 
 @app.get('/favicon.ico', include_in_schema=False)

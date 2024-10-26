@@ -28,6 +28,8 @@ Please assess the sentiment of the following text on a scale from 0 to 100, wher
 The text mentions {candidate}, a 2024 presidential candidate. Rate the sentiment based on the tone toward {candidate}.
 
 Provide a single number between 0 and 100 to reflect the overall sentiment in the text.
+
+Do not include any additional information in your response. Just a number between 0 and 100.
                     """,
                 }
             ],

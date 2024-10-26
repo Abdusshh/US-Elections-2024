@@ -3,13 +3,11 @@ from services.reddit_client import fetch_posts
 from services.qstash_service import publish_message_to_qstash
 
 CANDIDATES = ["Donald Trump", "Kamala Harris"]
+NUMBER_OF_POSTS_TO_FETCH = 100
 
 for candidate in CANDIDATES:
-    relevant_posts = fetch_posts(candidate, limit=10, sort="relevant", time_filter="day")
+    relevant_posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS_TO_FETCH, sort="relevant", time_filter="day")
     print("Relevant posts fetched")
-
-    hot_posts = fetch_posts(candidate, limit=10, sort="hot")
-    print("Hot posts fetched")
 
     publish_message_to_qstash(
         body={
@@ -18,6 +16,9 @@ for candidate in CANDIDATES:
         },
         url="store-post"
     )
+
+    hot_posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS_TO_FETCH, sort="hot")
+    print("Hot posts fetched")
 
     publish_message_to_qstash(
         body={
