@@ -18,18 +18,20 @@ reddit = praw.Reddit(
 )
 
 # Function to fetch posts from Reddit
-def fetch_posts(candidate: str, limit: int = 10):
+def fetch_posts(candidate: str, limit: int = 10, sort: str = "hot", time_filter: str = "all") -> list:
     posts = []
     query = candidate
     subreddit = reddit.subreddit("all")
-    for submission in subreddit.search(query, sort="new"):
-        if submission.selftext == "": # Skip posts without text
+    for submission in subreddit.search(query, sort=sort, time_filter=time_filter):
+        if submission.selftext == "":  # Skip posts without text
+            continue
+        if submission.score < 10:  # Skip posts with low scores
             continue
         posts.append({
             "title": submission.title,
             "selftext": submission.selftext,
             "url": submission.url
         })
-        if len(posts) >= limit: # Limit the number of posts
+        if len(posts) >= limit:  # Limit the number of posts
             break
     return posts
