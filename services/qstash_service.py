@@ -1,5 +1,9 @@
 import os
 from qstash import QStash
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Initialize QStash client
 qstash_client = QStash(os.getenv("QSTASH_TOKEN"))
