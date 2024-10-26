@@ -25,6 +25,7 @@ def read_root(request: Request, candidate_name: str = None):
     candidates = CANDIDATES
     scores = {}
     posts = []
+    valid_post_count_for_candidates = {}
 
     # Calculate sentiment scores for all candidates
     for candidate in candidates:
@@ -41,6 +42,7 @@ def read_root(request: Request, candidate_name: str = None):
             if number_of_valid_scores > 0:
                 average_score = total_score / number_of_valid_scores
                 scores[candidate] = round(average_score, 2)
+                valid_post_count_for_candidates[candidate] = number_of_valid_scores
             else:
                 scores[candidate] = "No data"
 
@@ -53,7 +55,8 @@ def read_root(request: Request, candidate_name: str = None):
         "request": request,
         "scores": scores,
         "selected_candidate": candidate_name,
-        "posts": posts
+        "posts": posts,
+        "post_counts": valid_post_count_for_candidates
     })
 
 # This endpoint will be called by the scheduler to fetch the latest posts
