@@ -13,7 +13,7 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-NUMBER_OF_POSTS_TO_FETCH = 10 # Based on function timeouts
+NUMBER_OF_POSTS_TO_FETCH = 10  # Based on function timeouts
 CANDIDATES = ["Donald Trump", "Kamala Harris"]
 NUMBER_OF_POSTS_TO_DISPLAY = 10
 DEFAULT_SCORE = -1
@@ -21,6 +21,7 @@ DEFAULT_SCORE = -1
 # This endpoint will display the sentiment scores for each candidate
 @app.get("/")
 def read_root(request: Request, candidate_name: str = None):
+    print("Accessed root endpoint with candidate:", candidate_name)
     candidates = CANDIDATES
     scores = {}
     posts = []
@@ -46,6 +47,7 @@ def read_root(request: Request, candidate_name: str = None):
     # If a candidate is selected, fetch their recent posts
     if candidate_name:
         posts = get_recent_posts(candidate_name, limit=NUMBER_OF_POSTS_TO_DISPLAY)
+        print(f"Recent posts for {candidate_name}: {posts}")
 
     return templates.TemplateResponse("index.html", {
         "request": request,
@@ -57,10 +59,13 @@ def read_root(request: Request, candidate_name: str = None):
 # This endpoint will be called by the scheduler to fetch the latest posts
 @app.post("/fetch-posts")
 def fetch_posts_endpoint():
+    print("Accessed fetch-posts endpoint")
     candidates = CANDIDATES
     for candidate in candidates:
         hot_posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS_TO_FETCH, sort="hot")
         relevant_posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS_TO_FETCH, sort="relevant", time_filter="day")
+        print(f"Fetched hot posts for {candidate}")
+        print(f"Fetched relevant posts for {candidate}")
 
         hot_posts_body = {
             "posts": hot_posts,
@@ -79,18 +84,19 @@ def fetch_posts_endpoint():
 @app.post("/store-post")
 async def store_post_endpoint(request: Request):
     data = await request.json()
-
     candidate = data["candidate"]
     posts = data["posts"]
+    print(f"Storing posts for {candidate}")
 
     # Iterate over the posts and store each one, while analyzing its sentiment
     for post in posts:
         # Skip posts that already exist in the store
         if check_post_exists(candidate, post["title"]):
+            print(f"Post already exists, skipping: {post['title']}")
             continue
 
-        print(f"Storing post: {post['title']}")
-        store_post(candidate, post["title"], post["url"], DEFAULT_SCORE)  # Default score is invalid
+        print(f"Storing new post: {post['title']}")
+        store_post(candidate, post["title"], post["url"], DEFAULT_SCORE)
 
         body = {
             "candidate": candidate,
@@ -100,7 +106,6 @@ async def store_post_endpoint(request: Request):
 
         publish_message_to_qstash(body, "analyze-sentiment")
 
-
 # This endpoint will be used to analyze the sentiment of a post
 @app.post("/analyze-sentiment")
 async def analyze_sentiment_endpoint(request: Request):
@@ -108,8 +113,10 @@ async def analyze_sentiment_endpoint(request: Request):
     selftext = data["selftext"]
     candidate = data["candidate"]
     title = data["title"]
+    print(f"Analyzing sentiment for candidate: {candidate}, Title: {title}")
 
     response = analyze_sentiment(f"Candidate: {candidate}, Title: {title}, Text: {selftext}", candidate, title)
+    print("Sentiment analysis started, response:", response)
 
     return JSONResponse(content={"status": "Sentiment analysis started", "message_id": response})
 
@@ -117,35 +124,27 @@ async def analyze_sentiment_endpoint(request: Request):
 # It will parse the response and store the sentiment score to redis
 @app.post("/sentiment-callback")
 async def sentiment_callback(candidate: str, title: str, request: Request):
-
-    # Parse the request body to JSON format
     data = await request.json()
-    print(data)
+    print("Received callback data:")
 
-    # Decode the base64-encoded 'body' field from the callback
     encoded_body = data.get('body', '')
     decoded_body = base64.b64decode(encoded_body).decode('utf-8')
 
-    # Parse the decoded body to JSON format
     decoded_data = json.loads(decoded_body)
-
-    # Extract the summary from the decoded response
     response = decoded_data['choices'][0]['message']['content']
+    print("Parsed response:", response)
 
-    # Parse the response to extract the sentiment score
     score = parse_response(response)
-
-    # Store the sentiment score to redis
+    print(f"Storing score for {candidate} - Title: {title}, Score: {score}")
     store_score(candidate, title, score)
 
     return JSONResponse(content={"status": "Sentiment score stored"})
 
-# Function to parse the response and extract the sentiment score
 def parse_response(response):
     score = float(''.join(filter(str.isdigit, response)))
+    print("Parsed score from response:", score)
     return score
 
 @app.get('/favicon.ico', include_in_schema=False)
 async def favicon():
     return FileResponse('favicon.ico')
-
