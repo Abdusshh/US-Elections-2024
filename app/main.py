@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
 from services.reddit_client import fetch_posts
 from services.sentiment_analysis import analyze_sentiment
-from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts
+from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts, check_post_exists
 from qstash import QStash
 import base64
 import os
@@ -17,9 +17,10 @@ templates = Jinja2Templates(directory="templates")
 # Initialize QStash client
 qstash_client = QStash(os.getenv("QSTASH_TOKEN"))
 
-NUMBER_OF_POSTS = 1
+NUMBER_OF_POSTS_TO_FETCH = 10 # Based on function timeouts
 CANDIDATES = ["Donald Trump", "Kamala Harris"]
 NUMBER_OF_POSTS_TO_DISPLAY = 10
+DEFAULT_SCORE = -1
 
 # This endpoint will display the sentiment scores for each candidate
 @app.get("/")
@@ -31,8 +32,18 @@ def read_root(request: Request, candidate_name: str = None):
     # Calculate sentiment scores for all candidates
     for candidate in candidates:
         candidate_posts = get_all_posts(candidate)
+        total_score = 0
+        number_of_valid_scores = 0
         if candidate_posts:
-            average_score = sum(float(post['score']) for post in candidate_posts) / len(candidate_posts)
+            for post in candidate_posts:
+                # Skip posts with a score of -1
+                if post['score'] == -1:
+                    continue
+                total_score += float(post['score'])
+                number_of_valid_scores += 1
+            if number_of_valid_scores > 0:
+                average_score = total_score / number_of_valid_scores
+                scores[candidate] = round(average_score, 2)
             scores[candidate] = round(average_score, 2)
         else:
             scores[candidate] = "No data"
@@ -53,18 +64,21 @@ def read_root(request: Request, candidate_name: str = None):
 def fetch_posts_endpoint():
     candidates = CANDIDATES
     for candidate in candidates:
-        posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS)
+        hot_posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS_TO_FETCH, sort="hot")
+        relevant_posts = fetch_posts(candidate, limit=NUMBER_OF_POSTS_TO_FETCH, sort="relevant", time_filter="day")
 
-        # Publish the posts to the /store-post endpoint
-        qstash_client.message.publish_json(
-            url=f"{os.getenv('API_BASE_URL')}/store-post",
-            body={
-                "posts": posts,
-                "candidate": candidate
-            },
-            headers={"Content-Type": "application/json"},
-            retries=1,
-        )
+        hot_posts_body = {
+            "posts": hot_posts,
+            "candidate": candidate
+        }
+
+        relevant_posts_body = {
+            "posts": relevant_posts,
+            "candidate": candidate
+        }
+
+        publish_message_to_qstash(hot_posts_body, "store-post")
+        publish_message_to_qstash(relevant_posts_body, "store-post")
 
 # This endpoint will be used to store posts that come from /fetch-posts
 @app.post("/store-post")
@@ -76,20 +90,21 @@ async def store_post_endpoint(request: Request):
 
     # Iterate over the posts and store each one, while analyzing its sentiment
     for post in posts:
-        print(f"Storing post: {post['title']}")
-        store_post(candidate, post["title"], post["url"], 50)  # Default score of 50
+        # Skip posts that already exist in the store
+        if check_post_exists(candidate, post["title"]):
+            continue
 
-        # Analyze the sentiment of the post
-        qstash_client.message.publish_json(
-            url=f"{os.getenv('API_BASE_URL')}/analyze-sentiment",
-            body={
-                "candidate": candidate,
-                "title": post["title"],
-                "selftext": post["selftext"]
-            },
-            headers={"Content-Type": "application/json"},
-            retries=1,
-        )
+        print(f"Storing post: {post['title']}")
+        store_post(candidate, post["title"], post["url"], DEFAULT_SCORE)  # Default score is invalid
+
+        body = {
+            "candidate": candidate,
+            "title": post["title"],
+            "selftext": post["selftext"]
+        }
+
+        publish_message_to_qstash(body, "analyze-sentiment")
+
 
 # This endpoint will be used to analyze the sentiment of a post
 @app.post("/analyze-sentiment")
@@ -138,3 +153,12 @@ def parse_response(response):
 @app.get('/favicon.ico', include_in_schema=False)
 async def favicon():
     return FileResponse('favicon.ico')
+
+# Function to publish a message to QStash
+def publish_message_to_qstash(body, url):
+    qstash_client.message.publish_json(
+        url=f"{os.getenv('API_BASE_URL')}/{url}",
+        body=body,
+        retries=1,
+        headers={"Content-Type": "application/json"},
+    )

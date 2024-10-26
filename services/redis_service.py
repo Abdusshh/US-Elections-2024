@@ -30,6 +30,12 @@ def get_recent_posts(candidate: str, limit: int):
     posts = []
     for key in keys:
         post = redis_client.hgetall(key)
+        # Skip posts with a score of -1 (invalid)
+        if post['score'] == -1:
+            continue
         posts.append(post)
     return posts
 
+def check_post_exists(candidate: str, title: str):
+    key = f"{candidate}:{title}"
+    return redis_client.exists(key)
