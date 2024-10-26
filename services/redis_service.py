@@ -31,7 +31,7 @@ def get_recent_posts(candidate: str, limit: int):
     for key in keys:
         post = redis_client.hgetall(key)
         # Skip posts with a score of -1 (invalid)
-        if post['score'] == -1:
+        if post['score'] == "-1":
             continue
         posts.append(post)
     return posts

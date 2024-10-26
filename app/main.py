@@ -5,17 +5,13 @@ from fastapi.responses import FileResponse
 from services.reddit_client import fetch_posts
 from services.sentiment_analysis import analyze_sentiment
 from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts, check_post_exists
-from qstash import QStash
+from services.qstash_service import publish_message_to_qstash
 import base64
-import os
 import json
 
 app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
-
-# Initialize QStash client
-qstash_client = QStash(os.getenv("QSTASH_TOKEN"))
 
 NUMBER_OF_POSTS_TO_FETCH = 10 # Based on function timeouts
 CANDIDATES = ["Donald Trump", "Kamala Harris"]
@@ -37,7 +33,7 @@ def read_root(request: Request, candidate_name: str = None):
         if candidate_posts:
             for post in candidate_posts:
                 # Skip posts with a score of -1
-                if post['score'] == -1:
+                if post['score'] == str(DEFAULT_SCORE):
                     continue
                 total_score += float(post['score'])
                 number_of_valid_scores += 1
@@ -154,11 +150,3 @@ def parse_response(response):
 async def favicon():
     return FileResponse('favicon.ico')
 
-# Function to publish a message to QStash
-def publish_message_to_qstash(body, url):
-    qstash_client.message.publish_json(
-        url=f"{os.getenv('API_BASE_URL')}/{url}",
-        body=body,
-        retries=1,
-        headers={"Content-Type": "application/json"},
-    )
