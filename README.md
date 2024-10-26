@@ -7,8 +7,7 @@ This project is a FastAPI application designed to provide information and analyt
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/US-Elections.git
-    cd US-Elections
+    git clone https://github.com/Abdusshh/US-Elections-2024.git
     ```
 
 2. **Create and activate a virtual environment:**
