@@ -47,7 +47,7 @@ def read_root(request: Request, candidate_name: str = None):
     # If a candidate is selected, fetch their recent posts
     if candidate_name:
         posts = get_recent_posts(candidate_name, limit=NUMBER_OF_POSTS_TO_DISPLAY)
-        print(f"Recent posts for {candidate_name}: {posts}")
+        print(f"Recent posts for {candidate_name} fetched")
 
     return templates.TemplateResponse("index.html", {
         "request": request,
@@ -116,10 +116,10 @@ async def analyze_sentiment_endpoint(request: Request):
     title = data["title"]
     print(f"Analyzing sentiment for candidate: {candidate}, Title: {title}")
 
-    response = analyze_sentiment(f"Candidate: {candidate}, Title: {title}, Text: {selftext}", candidate, title)
-    print("Sentiment analysis started, response:", response)
+    analyze_sentiment(f"Candidate: {candidate}, Title: {title}, Text: {selftext}", candidate, title)
+    print("Sentiment analysis started")
 
-    return JSONResponse(content={"status": "Sentiment analysis started", "message_id": response})
+    return JSONResponse(content={"status": "Sentiment analysis started"})
 
 # This endpoint will be used as the callback URL for the sentiment analysis
 # It will parse the response and store the sentiment score to redis

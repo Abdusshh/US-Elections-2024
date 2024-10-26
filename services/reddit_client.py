@@ -22,16 +22,24 @@ def fetch_posts(candidate: str, limit: int = 10, sort: str = "hot", time_filter:
     posts = []
     query = candidate
     subreddit = reddit.subreddit("all")
+    
     for submission in subreddit.search(query, sort=sort, time_filter=time_filter):
         if submission.selftext == "":  # Skip posts without text
             continue
         if submission.score < 10:  # Skip posts with low scores
             continue
+        
+        # Clean title and selftext to remove non-ASCII characters
+        title = submission.title.encode("ascii", "ignore").decode("ascii")
+        selftext = submission.selftext.encode("ascii", "ignore").decode("ascii")
+        
         posts.append({
-            "title": submission.title,
-            "selftext": submission.selftext,
+            "title": title,
+            "selftext": selftext,
             "url": submission.url
         })
+        
         if len(posts) >= limit:  # Limit the number of posts
             break
+            
     return posts
