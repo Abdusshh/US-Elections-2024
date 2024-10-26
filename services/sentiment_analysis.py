@@ -32,6 +32,6 @@ Provide a single number between 0 and 100 to reflect the overall sentiment in th
                 }
             ],
         },
-        callback = f"{api_base_url}/sentiment-callback?candidate={quote(candidate)}&title={quote(title)}"
+        callback = f"{api_base_url}/sentiment-callback?candidate={quote(candidate)}&title={quote(title)}",
         retries=1,
     )
