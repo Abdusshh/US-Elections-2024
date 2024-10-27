@@ -79,7 +79,7 @@ def update_scores_endpoint():
                 number_of_valid_scores += 1
             if number_of_valid_scores > 0:
                 average_score = total_score / number_of_valid_scores
-                store_score_history(candidate, average_score)
+                store_score_history(candidate, round(average_score, 2))
                 print(f"Updated score for {candidate}")
             else:
                 print(f"No valid scores found for {candidate}")

@@ -20,7 +20,7 @@ def schedule_reddit_fetch():
 def schedule_updating_scores():
     qstash_client.schedule.create(
         destination=f"{api_base_url}/update-scores",
-        cron="*/30 * * * *",  # Every 30 minutes
+        cron="0 * * * *",  # Every hour
         retries=1,
     )
 

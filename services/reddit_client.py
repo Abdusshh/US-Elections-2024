@@ -25,8 +25,8 @@ def fetch_posts(candidate: str, limit: int = 10, sort: str = "hot", time_filter:
     subreddit = reddit.subreddit("all")
     
     for submission in subreddit.search(query, sort=sort, time_filter=time_filter):
-        if submission.selftext == "":  # Skip posts without text
-            continue
+        # if submission.selftext == "":  # Skip posts without text
+        #     continue
         if submission.score < UPVOTE_THRESHOLD:  # Skip posts with low scores
             continue
         
