@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
 from services.reddit_client import fetch_posts
 from services.sentiment_analysis import analyze_sentiment
-from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts, check_post_exists, get_score
+from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts, check_post_exists, get_score, store_score_history, get_score_history
 from services.qstash_service import publish_message_to_qstash
 import base64
 import json
@@ -26,12 +26,14 @@ def read_root(request: Request, candidate_name: str = None):
     scores = {}
     posts = []
     valid_post_count_for_candidates = {}
+    score_history = {}
 
     # Calculate sentiment scores for all candidates
     for candidate in candidates:
         candidate_posts = get_all_posts(candidate)
         total_score = 0
         number_of_valid_scores = 0
+        score_history[candidate] = get_score_history(candidate)
         if candidate_posts:
             for post in candidate_posts:
                 # Skip posts with a score of -1
@@ -54,10 +56,35 @@ def read_root(request: Request, candidate_name: str = None):
     return templates.TemplateResponse("index.html", {
         "request": request,
         "scores": scores,
+        "score_history": score_history,
         "selected_candidate": candidate_name,
         "posts": posts,
         "post_counts": valid_post_count_for_candidates
     })
+
+@app.post("/update-scores")
+def update_scores_endpoint():
+    print("Accessed update-scores endpoint")
+    candidates = CANDIDATES
+    for candidate in candidates:
+        candidate_posts = get_all_posts(candidate)
+        total_score = 0
+        number_of_valid_scores = 0
+        if candidate_posts:
+            for post in candidate_posts:
+                # Skip posts with a score of -1
+                if post['score'] == str(DEFAULT_SCORE):
+                    continue
+                total_score += float(post['score'])
+                number_of_valid_scores += 1
+            if number_of_valid_scores > 0:
+                average_score = total_score / number_of_valid_scores
+                store_score_history(candidate, average_score)
+                print(f"Updated score for {candidate}")
+            else:
+                print(f"No valid scores found for {candidate}")
+
+    return JSONResponse(content={"status": "Scores updated"})
 
 # This endpoint will be called by the scheduler to fetch the latest posts
 @app.post("/fetch-posts")

@@ -45,3 +45,13 @@ def check_post_exists(candidate: str, title: str):
 def get_score(candidate: str, title: str):
     key = f"{candidate}:{title}"
     return redis_client.hget(key, "score")
+
+def store_score_history(candidate: str, score: float):
+    key = f"{candidate}:scores"
+    redis_client.rpush(key, score)
+    # Limit the number of scores to store to 100
+    redis_client.ltrim(key, -100, -1)
+
+def get_score_history(candidate: str):
+    key = f"{candidate}:scores"
+    return redis_client.lrange(key, 0, -1)
