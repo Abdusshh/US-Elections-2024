@@ -29,4 +29,76 @@
     <a href="/">Clear Posts</a>
 {% endif %}
 
+<h1>Candidate Sentiment Scores Over Time</h1>
+
+<!-- Line chart for sentiment scores over time -->
+<canvas id="scoreHistoryChart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Prepare data for the line chart
+    const scoreHistory = {{ score_history | tojson }};
+    const datasets = [];
+
+    // Create a dataset for each candidate
+    for (const candidate in scoreHistory) {
+        const candidateScores = scoreHistory[candidate].map(score => parseFloat(score));
+
+        // Add a dataset for each candidate
+        datasets.push({
+            label: candidate,
+            data: candidateScores,
+            borderColor: candidate == 'Donald Trump' ? 'rgb(234, 59, 60)' : 'rgb(0, 102, 203)', // Red for Donald Trump, blue for others
+            fill: false,
+            tension: 0.1 // Smooth curves for the lines
+        });
+    }
+
+    // Generate time labels for the last x values
+    function generateTimeLabels(length) {
+        const labels = [];
+        let currentTime = new Date();
+
+        for (let i = 0; i < length; i++) {
+            labels.unshift(currentTime.toLocaleString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+                month: "short",
+                day: "numeric"
+            }));
+            currentTime.setHours(currentTime.getHours() - 1); // Go back one hour
+        }
+
+        return labels;
+    }
+
+    // Render the chart with generated time labels
+    const ctx = document.getElementById('scoreHistoryChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: generateTimeLabels(scoreHistory[Object.keys(scoreHistory)[0]].length),
+            datasets: datasets
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Sentiment Score'
+                    }
+                }
+            }
+        }
+    });
+</script>
+
 {% endblock %}
