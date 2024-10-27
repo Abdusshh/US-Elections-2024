@@ -17,7 +17,9 @@ def store_post(candidate: str, title: str, url: str, score: float):
 
 def store_score(candidate: str, title: str, score: float):
     key = f"{candidate}:{title}"
-    redis_client.hset(key, "score", score)
+    url = redis_client.hget(key, "url")
+    data = {"title": title, "url": url, "score": score}
+    redis_client.hset(key, values=data)
 
 def get_all_posts(candidate: str):
     keys = redis_client.smembers(f"{candidate}:posts")
