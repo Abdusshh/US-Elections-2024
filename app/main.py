@@ -23,7 +23,6 @@ DEFAULT_SCORE = -1
 def read_root(request: Request, candidate_name: str = None):
     print("Accessed root endpoint with candidate:", candidate_name)
     candidates = CANDIDATES
-    scores = {}
     posts = []
     valid_post_count_for_candidates = {}
     score_history = {}
@@ -31,7 +30,6 @@ def read_root(request: Request, candidate_name: str = None):
     # Calculate sentiment scores for all candidates
     for candidate in candidates:
         candidate_posts = get_all_posts(candidate)
-        total_score = 0
         number_of_valid_scores = 0
         score_history[candidate] = get_score_history(candidate)
         if candidate_posts:
@@ -39,14 +37,8 @@ def read_root(request: Request, candidate_name: str = None):
                 # Skip posts with a score of -1
                 if post['score'] == str(DEFAULT_SCORE):
                     continue
-                total_score += float(post['score'])
                 number_of_valid_scores += 1
-            if number_of_valid_scores > 0:
-                average_score = total_score / number_of_valid_scores
-                scores[candidate] = round(average_score, 2)
                 valid_post_count_for_candidates[candidate] = number_of_valid_scores
-            else:
-                scores[candidate] = "No data"
 
     # If a candidate is selected, fetch their recent posts
     if candidate_name:
@@ -55,7 +47,6 @@ def read_root(request: Request, candidate_name: str = None):
 
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "scores": scores,
         "score_history": score_history,
         "selected_candidate": candidate_name,
         "posts": posts,

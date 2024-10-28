@@ -100,7 +100,7 @@
 </div>
 
 <ul>
-    {% for candidate, score in scores.items() %}
+    {% for candidate, score_hist in score_history.items() %}
     <li>
         {{ candidate }} has {{ post_counts[candidate] }} posts in the database.
     </li>
@@ -108,7 +108,7 @@
 </ul>
 
 <ul>
-    {% for candidate, score in scores.items() %}
+    {% for candidate, score_hist in score_history.items() %}
     <li>
         View posts about <a href="/?candidate_name={{ candidate }}" class="candidate-link">{{ candidate }}</a>
     </li>
