@@ -49,7 +49,7 @@
     }
     .chart-container {
         width: 90%;
-        max-width: 1000px;
+        max-width: 1100px;
         margin: 20px auto;
     }
     .post-list {
@@ -87,6 +87,30 @@
         text-decoration: none;
         font-weight: bold;
     }
+    .clear-posts a:hover {
+        text-decoration: underline;
+    }
+    footer {
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid #ddd;
+    width: 100%;
+    background-color: #f8f8f8;
+    margin-top: 30px;
+    }
+    footer a {
+        color: #05061c;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    footer a:hover {
+        text-decoration: underline;
+    }
+    footer img {
+        vertical-align: middle;
+    }
 </style>
 
 <h1>Candidate Sentiment Scores</h1>
@@ -99,13 +123,7 @@
     <canvas id="scoreHistoryChart"></canvas>
 </div>
 
-<ul>
-    {% for candidate, score_hist in score_history.items() %}
-    <li>
-        {{ candidate }} has {{ post_counts[candidate] }} posts in the database.
-    </li>
-    {% endfor %}
-</ul>
+
 
 <ul>
     {% for candidate, score_hist in score_history.items() %}
@@ -198,5 +216,15 @@
         }
     });
 </script>
+
+<!-- Footer Section -->
+<footer>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <!-- Upstash Icon -->
+        <img src="https://upstash.com/logo/upstash-icon-white-bg.png" alt="Upstash Logo" width="16" height="16">
+        <span>Powered by Upstash Redis <img src="https://upstash.com/logo/redis-icon.png" alt="Upstash Logo" width="16" height="16">  and QStash  <img src="https://upstash.com/logo/qstash-icon.png" alt="Upstash Logo" width="16" height="16"></span> | 
+        <a href="https://github.com/upstash/elections-sentiment-analysis" target="_blank">Check the GitHub Repo</a>
+    </div>
+</footer>
 
 {% endblock %}

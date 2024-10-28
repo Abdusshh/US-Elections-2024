@@ -24,21 +24,11 @@ def read_root(request: Request, candidate_name: str = None):
     print("Accessed root endpoint with candidate:", candidate_name)
     candidates = CANDIDATES
     posts = []
-    valid_post_count_for_candidates = {}
     score_history = {}
 
-    # Calculate sentiment scores for all candidates
+    # Get the score history for each candidate
     for candidate in candidates:
-        candidate_posts = get_all_posts(candidate)
-        number_of_valid_scores = 0
         score_history[candidate] = get_score_history(candidate)
-        if candidate_posts:
-            for post in candidate_posts:
-                # Skip posts with a score of -1
-                if post['score'] == str(DEFAULT_SCORE):
-                    continue
-                number_of_valid_scores += 1
-                valid_post_count_for_candidates[candidate] = number_of_valid_scores
 
     # If a candidate is selected, fetch their recent posts
     if candidate_name:
@@ -49,8 +39,7 @@ def read_root(request: Request, candidate_name: str = None):
         "request": request,
         "score_history": score_history,
         "selected_candidate": candidate_name,
-        "posts": posts,
-        "post_counts": valid_post_count_for_candidates
+        "posts": posts
     })
 
 @app.post("/update-scores")
