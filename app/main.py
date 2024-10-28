@@ -47,11 +47,16 @@ def update_scores_endpoint():
     print("Accessed update-scores endpoint")
     candidates = CANDIDATES
     for candidate in candidates:
+        print(f"Getting posts for {candidate}")
         candidate_posts = get_all_posts(candidate)
+        print(f"Updating scores for {candidate}")
         total_score = 0
         number_of_valid_scores = 0
+        i = 0
         if candidate_posts:
             for post in candidate_posts:
+                print(f"Post {i}: {post['title']}")
+                i += 1
                 # Skip posts with a score of -1
                 if post['score'] == str(DEFAULT_SCORE):
                     continue
