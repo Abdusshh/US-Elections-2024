@@ -34,7 +34,10 @@ def trim_old_posts(candidate: str):
         
         # Remove the excess posts from both the `post_order` sorted set and `posts` set
         for post_key in excess_posts:
+            print(f"Removing post: {post_key}")
+            print(f"Number of posts in {candidate}:posts before removal: {redis_client.scard(f'{candidate}:posts')}")
             redis_client.srem(f"{candidate}:posts", post_key)
+            print(f"Number of posts in {candidate}:posts after removal: {redis_client.scard(f'{candidate}:posts')}")
             redis_client.delete(post_key)  # Remove the post data from the hash
         redis_client.zremrangebyrank(f"{candidate}:post_order", 0, post_count - POST_LIMIT - 1)
 
@@ -47,10 +50,12 @@ def store_score(candidate: str, title: str, score: float):
 def get_all_posts(candidate: str):
     # Get all posts based on the ordered list in post_order
     keys = redis_client.zrevrange(f"{candidate}:post_order", 0, -1)  # Newest to oldest
+    print(f"Number of posts for {candidate}: {len(keys)} in post_order")
     posts = []
     for key in keys:
         post = redis_client.hgetall(key)
         posts.append(post)
+    print(f"Number of posts for {candidate}: {len(posts)} in hashes")
     return posts
 
 def get_recent_posts(candidate: str, limit: int):
