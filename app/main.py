@@ -20,25 +20,24 @@ DEFAULT_SCORE = -1
 
 # This endpoint will display the sentiment scores for each candidate
 @app.get("/")
-def read_root(request: Request, candidate_name: str = None):
-    print("Accessed root endpoint with candidate:", candidate_name)
+def read_root(request: Request):
+    print("Accessed root endpoint")
     candidates = CANDIDATES
-    posts = []
+    posts = {}
     score_history = {}
 
     # Get the score history for each candidate
     for candidate in candidates:
         score_history[candidate] = get_score_history(candidate)
 
-    # If a candidate is selected, fetch their recent posts
-    if candidate_name:
-        posts = get_recent_posts(candidate_name, limit=NUMBER_OF_POSTS_TO_DISPLAY)
-        print(f"Recent posts for {candidate_name} fetched")
+    # Fetch recent posts for both Trump and Harris
+    for candidate in ["Donald Trump", "Kamala Harris"]:
+        posts[candidate] = get_recent_posts(candidate, limit=NUMBER_OF_POSTS_TO_DISPLAY)
+        print(f"Recent posts for {candidate} fetched")
 
     return templates.TemplateResponse("index.html", {
         "request": request,
         "score_history": score_history,
-        "selected_candidate": candidate_name,
         "posts": posts
     })
 
