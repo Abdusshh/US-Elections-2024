@@ -1,4 +1,4 @@
-# US Elections FastAPI Project
+# 2024 US Elections Sentiment Analysis Using Reddit Posts with QStash and Upstash Redis
 
 ## Overview
 
