@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
 from services.reddit_client import fetch_posts
 from services.sentiment_analysis import analyze_sentiment
-from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts, check_post_exists, get_score, store_score_history, get_score_history
+from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts, check_post_exists, get_score, store_score_history, get_score_history, make_score_histories_equal_length
 from services.qstash_service import publish_message_to_qstash
 import base64
 import json
@@ -69,6 +69,16 @@ def update_scores_endpoint():
                 print(f"No valid scores found for {candidate}")
 
     return JSONResponse(content={"status": "Scores updated"})
+
+@app.post("/update-scores-failed")
+def update_scores_failed_endpoint():
+    print("Accessed update-scores-failed endpoint")
+
+    # Make the score_history for each candidate the same length as the shortest one
+    candidates = CANDIDATES
+    make_score_histories_equal_length(candidates[0], candidates[1])
+
+    return JSONResponse(content={"status": "Scores update failed"})
 
 # This endpoint will be called by the scheduler to fetch the latest posts
 @app.post("/fetch-posts")

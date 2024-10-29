@@ -22,8 +22,9 @@ def schedule_updating_scores():
         destination=f"{api_base_url}/update-scores",
         cron="0 * * * *",  # Every hour
         retries=0,
+        failure_callback=f"{api_base_url}/update-scores-failed"
     )
 
 if __name__ == "__main__":
-    # schedule_reddit_fetch()
+    schedule_reddit_fetch()
     schedule_updating_scores()

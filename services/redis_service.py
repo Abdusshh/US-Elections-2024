@@ -87,3 +87,11 @@ def store_score_history(candidate: str, score: float):
 def get_score_history(candidate: str):
     key = f"{candidate}:scores"
     return redis_client.lrange(key, 0, -1)
+
+def make_score_histories_equal_length(candidate1: str, candidate2: str):
+    scores1 = get_score_history(candidate1)
+    scores2 = get_score_history(candidate2)
+    if len(scores1) > len(scores2):
+        redis_client.ltrim(f"{candidate1}:scores", 0, len(scores2) - 1)
+    elif len(scores2) > len(scores1):
+        redis_client.ltrim(f"{candidate2}:scores", 0, len(scores1) - 1)
