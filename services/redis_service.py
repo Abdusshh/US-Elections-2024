@@ -26,18 +26,18 @@ def store_post(candidate: str, title: str, url: str, score: float):
 
 def trim_old_posts(candidate: str):
     # Check if the number of posts exceeds POST_LIMIT
-    post_count = redis_client.zcard(f"{candidate}:post_order")
+    post_count = redis_client.scard(f"{candidate}:posts")
+    print(f"Number of posts for {candidate}: {post_count}")
     
     if post_count > POST_LIMIT:
         # Get the oldest posts that exceed the POST_LIMIT
         excess_posts = redis_client.zrange(f"{candidate}:post_order", 0, post_count - POST_LIMIT - 1)
+        print(f"Excess post count: {len(excess_posts)}")
         
         # Remove the excess posts from both the `post_order` sorted set and `posts` set
         for post_key in excess_posts:
             print(f"Removing post: {post_key}")
-            print(f"Number of posts in {candidate}:posts before removal: {redis_client.scard(f'{candidate}:posts')}")
             redis_client.srem(f"{candidate}:posts", post_key)
-            print(f"Number of posts in {candidate}:posts after removal: {redis_client.scard(f'{candidate}:posts')}")
             redis_client.delete(post_key)  # Remove the post data from the hash
         redis_client.zremrangebyrank(f"{candidate}:post_order", 0, post_count - POST_LIMIT - 1)
 
