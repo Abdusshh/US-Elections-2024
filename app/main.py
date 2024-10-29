@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
 from services.reddit_client import fetch_posts
-from services.sentiment_analysis import analyze_sentiment
+from services.sentiment_analysis import analyze_sentiment, parse_response
 from services.redis_service import store_post, get_all_posts, store_score, get_recent_posts, check_post_exists, get_score, store_score_history, get_score_history, make_score_histories_equal_length
 from services.qstash_service import publish_message_to_qstash
 import base64
@@ -13,7 +13,7 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-NUMBER_OF_POSTS_TO_FETCH = 10  # Based on function timeouts
+NUMBER_OF_POSTS_TO_FETCH = 10 
 CANDIDATES = ["Donald Trump", "Kamala Harris"]
 NUMBER_OF_POSTS_TO_DISPLAY = 10
 DEFAULT_SCORE = -1
@@ -164,15 +164,6 @@ async def sentiment_callback(candidate: str, title: str, request: Request):
     store_score(candidate, title, score)
 
     return JSONResponse(content={"status": "Sentiment score stored"})
-
-def parse_response(response):
-    score = float(''.join(filter(str.isdigit, response)))
-    print("Parsed score from response:", score)
-    if score > 100:
-        score = 100
-    if score < 0:
-        score = 0
-    return score
 
 @app.get('/favicon.ico', include_in_schema=False)
 async def favicon():
