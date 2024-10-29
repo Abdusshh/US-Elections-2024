@@ -26,7 +26,7 @@ def store_post(candidate: str, title: str, url: str, score: float):
 
 def trim_old_posts(candidate: str):
     # Check if the number of posts exceeds POST_LIMIT
-    post_count = redis_client.scard(f"{candidate}:posts")
+    post_count = redis_client.zcard(f"{candidate}:post_order")
     print(f"Number of posts for {candidate}: {post_count}")
     
     if post_count > POST_LIMIT:
@@ -39,7 +39,7 @@ def trim_old_posts(candidate: str):
             print(f"Removing post: {post_key}")
             redis_client.srem(f"{candidate}:posts", post_key)
             redis_client.delete(post_key)  # Remove the post data from the hash
-        redis_client.zremrangebyrank(f"{candidate}:post_order", 0, post_count - POST_LIMIT - 1)
+            redis_client.zrem(f"{candidate}:post_order", post_key)
 
 def store_score(candidate: str, title: str, score: float):
     key = f"{candidate}:{title}"
